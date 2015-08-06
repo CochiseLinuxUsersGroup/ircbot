@@ -70,24 +70,25 @@ def force_check_github():
             print "GitHub fucked up, I think. Here's what they gave us:"
             print new
             
-# Mail function       
+# Mail function    This needs testing, mailing list is too inactive at the moment to test   
 def check_mail():
 	new_mail = feedparser.parse("https://www.freelists.org/feed/cochiselinux")
 	mail_msg = new_mail.entries[0].title
 	irc_msg( mail_msg )
 	return
 	
-# Calendar functions
+# Calendar functions  This is a bit messy atm.  Would like to implement google-api at some point
 def calendar():
 	calendar = feedparser.parse("https://www.google.com/calendar/feeds/fp9et4ecr2c131rth7ftvfua1g%40group.calendar.google.com/public/basic")
+	cal_short = "http://tinyurl.com/cochisecal"
 	latest_ev = calendar.entries[0].title
 	latest_sum = calendar.entries[0].summary
 	if '&nbsp;' in latest_sum:
 		print 'Stripping'
-		stripped_sum = latest_sum.replace('&nbsp;', '')
-		irc_msg( '[Next CLUG event]: ' + latest_ev + ' | ' + stripped_sum )
+		stripped_sum = latest_sum.replace('&nbsp;', ' | For details: ' + cal_short)
+		irc_msg( '[Next CLUG event]: ' + latest_ev + ' | ' + stripped_sum  )
 	else:
-		irc_msg( '[Next CLUG event]: ' + latest_ev + ' | ' + latest_sum )
+		irc_msg( '[Next CLUG event]: ' + latest_ev + ' | ' + latest_sum + ' | ' + 'See Google calendar for details: ' + cal_short )
 	return
 	
 			
