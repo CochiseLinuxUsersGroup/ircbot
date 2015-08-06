@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #Written by paulbe,  github code written by elimisteve
 
-import feedparser, socket, time, pywapi, string
+import feedparser, socket, time, pywapi, string, random
 
 #Connection info for IRC
 USER = 'CLUG_INFO'  #set bot name
@@ -20,6 +20,7 @@ irc.send( 'NICK ' + botname + end )
 irc.send( 'USER ' + USER + 'bot botty bot bot: Python IRC' + end )
 irc.send( 'JOIN ' + chatchannel + end )
 
+bot_list = "hello".split()
 
 # Helper Functions
 def irc_msg(msg):
@@ -46,7 +47,7 @@ branch = 'master'
 repo_names = ['cochiselinuxusersgroup.github.io', 'projectcode', 'ircbot']
 SLEEP_SECONDS = float(60*2.4)/len(repo_names)  # Check each repo once/couple minutes
 
-
+# Check github for last change in each repo in repo_names
 def force_check_github():
     old_version = {}
     for repo in repo_names:
@@ -112,12 +113,72 @@ def irchelp():
 	irc_msg( "Available commands: !info, !lastmail, !lastpush, !weather, !nextevent, !google <searchterm> (More to come!)")
 	irc_msg( "Use !h <command> for more info ie !h info")
 	return
-	
+
+
+# Google function	
 def g_search():
 	q_google = content('google').replace(' ', '+')
 	s_google = "http://www.google.com/search?q=" + q_google
 	irc_msg(s_google)
+
+
+# Simple rock, paper, scissors game, played vs the bot	
+def rps():
+	player_score = 0
+	computer_score = 0
+	tie = 0
+	# Handles player choice
+	if ':!rock' in data.lower():
+		player = 'rock'
+	elif ':!paper' in data.lower():
+		player = 'paper'
+	elif ':!scissors' in data.lower():
+		player = 'scissors'
+
+	# Random choice for computer
+	computer = random.randint(0,2);
+	if (computer == 0):
+		computer = "rock";
+	elif (computer == 1):
+		computer = "paper";
+	elif (computer == 2):
+		computer = "scissors";
+	else:
+		computer = "error";
 		
+	#Round handler
+	if (player == computer):
+		tie += 1;
+		print("Draw");
+		irc_msg( 'Player: ' + player + ' , Bot: ' + computer + ' Tie!' )
+	elif (player == 'rock'):
+		if (computer == 'paper'):
+			computer_score += 1;
+			print("Computer Wins");
+			irc_msg('Player: ' + player + ' , Bot: ' + computer + ' Computer Wins!' )
+		else:
+			player_score += 1;
+			print("Player Wins");
+			irc_msg('Player: ' + player + ' , Bot: ' + computer + ' Player Wins!' )
+	elif (player == 'paper'):
+		if (computer == 'rock'):
+			player_score += 1;
+			print ("Player Wins");
+			irc_msg('Player: ' + player + ' , Bot: ' + computer + ' Player Wins!' )
+		else:
+			computer_score += 1;
+			print ("Computer Wins");
+			irc_msg('Player: ' + player + ' , Bot: ' + computer + ' Computer Wins!' )
+	elif (player == 'scissors'):
+		if (computer == 'rock'):
+			computer_score += 1;
+			print ("Computer Wins");
+			irc_msg('Player: ' + player + ' , Bot: ' + computer + ' Computer Wins!' )
+		else:
+			player_score += 1;
+			print ("Player Wins");
+			irc_msg('Player: ' + player + ' , Bot: ' + computer + ' Player Wins!' )
+				
 # Main Loop
 while True:
 	data = irc.recv ( 4096 )
@@ -170,4 +231,26 @@ while True:
 	if ':!google' in data.lower(): # Google search function
 		print data
 		g_search()
+
+#rock,paper,scissors	
+	if ':!rock' in data.lower():
+		rps()
+	if ':!paper' in data.lower():
+		rps()
+	if ':!scissors' in data.lower():
+		rps()
+#end rock,paper,scissors
+
+	# Bot's manners
+	if not username.lower().endswith('INFO'):
+		if 'good' and 'morning' in data.lower():
+			irc_msg( 'Good Morning ' + username )
+		if 'good' and 'afternoon' in data.lower():
+			irc_msg( 'Good afternoon ' + username)
+		if 'good' and 'evening' in data.lower():
+			irc_msg( 'Good evening ' + username)
+		for word in bot_list: # Add words to bot_list to add more triggers
+			if word.lower() in data.lower():
+				irc_msg( 'hello ' + username)
+				break
 
