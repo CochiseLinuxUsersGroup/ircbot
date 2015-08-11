@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 #Written by paulbe,  github code written by elimisteve
 
-import feedparser, socket, time, pywapi, string, random
+import feedparser, socket, time, pywapi, string, random, requests
+from lxml import html
 
 #Connection info for IRC
 USER = 'CLUG_INFO'  #set bot name
@@ -20,7 +21,6 @@ irc.send( 'NICK ' + botname + end )
 irc.send( 'USER ' + USER + 'bot botty bot bot: Python IRC' + end )
 irc.send( 'JOIN ' + chatchannel + end )
 
-bot_list = "hello".split()
 
 # Helper Functions
 def irc_msg(msg):
@@ -70,13 +70,15 @@ def force_check_github():
         except:
             print "GitHub fucked up, I think. Here's what they gave us:"
             print new
-            
+""" 
+# Broken at the moment.  I think it is on the mailing list's end.           
 # Mail function    This needs testing, mailing list is too inactive at the moment to test   
 def check_mail():
 	new_mail = feedparser.parse("https://www.freelists.org/feed/cochiselinux")
 	mail_msg = new_mail.entries[0].title
 	irc_msg( mail_msg )
 	return
+"""	
 	
 # Calendar functions  This is a bit messy atm.  Would like to implement google-api at some point
 def calendar():
@@ -178,6 +180,22 @@ def rps():
 			player_score += 1;
 			print ("Player Wins");
 			irc_msg('Player: ' + player + ' , Bot: ' + computer + ' Player Wins!' )
+
+# Need to test, Need to add other repos			
+def list_issue():
+	url ='https://github.com/CochiseLinuxUsersGroup/CochiseLinuxUsersGroup.github.io/issues'
+	cookies = dict(cookies_are='working')
+	page = requests.get(url, cookies=cookies)
+	tree = html.fromstring(page.text)
+	issues = tree.xpath('//a[@class="issue-title-link js-navigation-open"]/text()')
+	cissue = issues[0].replace("\n      ", "")
+	print cissue
+	irc_msg('[cochiselinuxusersgroup.github.io] Latest issue: ' + cissue)
+	#for line in issues:
+	#	line.replace(" ", "")
+	#	cur_issue = issues[0]
+	#	irc_msg(cur_issue)
+		
 				
 # Main Loop
 while True:
@@ -212,9 +230,9 @@ while True:
 		irc_msg( "!google <searchterm> - Return a google search (link) in irc")
 #End help functions
 			
-	if ':!lastmail' in data.lower(): # Lastmail function
-		print data
-		check_mail()
+#	if ':!lastmail' in data.lower(): # Lastmail function
+#		print data
+#w		check_mail()
 	
 	if ':!lastpush' in data.lower(): # Lastpush function
 		print data
@@ -240,17 +258,5 @@ while True:
 	if ':!scissors' in data.lower():
 		rps()
 #end rock,paper,scissors
-
-	# Bot's manners
-	if not username.lower().endswith('INFO'):
-		if 'good' and 'morning' in data.lower():
-			irc_msg( 'Good Morning ' + username )
-		if 'good' and 'afternoon' in data.lower():
-			irc_msg( 'Good afternoon ' + username)
-		if 'good' and 'evening' in data.lower():
-			irc_msg( 'Good evening ' + username)
-		for word in bot_list: # Add words to bot_list to add more triggers
-			if word.lower() in data.lower():
-				irc_msg( 'hello ' + username)
-				break
-
+	if ':!issue' in data.lower():
+		list_issue()
