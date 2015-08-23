@@ -44,7 +44,7 @@ def content(keyword):
 #
 account_name = 'cochiselinuxusersgroup'
 branch = 'master'
-repo_names = ['cochiselinuxusersgroup.github.io', 'projectcode', 'ircbot']
+repo_names = ['cochiselinuxusersgroup.github.io', 'projectcode', 'ircbot', 'Presentations']
 SLEEP_SECONDS = float(60*2.4)/len(repo_names)  # Check each repo once/couple minutes
 
 # Check github for last change in each repo in repo_names
@@ -191,12 +191,25 @@ def list_issue():
 	cissue = issues[0].replace("\n      ", "")
 	print cissue
 	irc_msg('[cochiselinuxusersgroup.github.io] Latest issue: ' + cissue)
-	#for line in issues:
-	#	line.replace(" ", "")
-	#	cur_issue = issues[0]
-	#	irc_msg(cur_issue)
-		
-				
+	
+# Dictionary
+
+def dictionary():
+	query = content('define').replace(' ', '')
+	url = "http://google-dictionary.so8848.com/meaning?word="
+	search = url + query
+	page = requests.get(search)
+	tree = html.fromstring(page.text)
+	definition = tree.xpath('//li[@style="list-style:decimal"]/text()')
+	if not definition:
+		print 'Sorry, no definition for ' + query + ' was found.'
+		irc_msg('Sorry, no definition for ' + query + ' was found.')
+	else:
+		new_def = definition[0].replace("\n", "")
+		print 'Definition of ' + query + ': ' + new_def
+		irc_msg('Definition of ' + query + ': ' + new_def)
+		return
+			
 # Main Loop
 while True:
 	data = irc.recv ( 4096 )
@@ -230,9 +243,9 @@ while True:
 		irc_msg( "!google <searchterm> - Return a google search (link) in irc")
 #End help functions
 			
-#	if ':!lastmail' in data.lower(): # Lastmail function
-#		print data
-#w		check_mail()
+	if ':!lastmail' in data.lower(): # Lastmail function
+		print data
+		irc_msg( 'Sorry but !lastmail is currently not working, try again later!' )
 	
 	if ':!lastpush' in data.lower(): # Lastpush function
 		print data
@@ -260,3 +273,6 @@ while True:
 #end rock,paper,scissors
 	if ':!issue' in data.lower():
 		list_issue()
+
+	if ':!define' in data.lower():
+		dictionary()
